@@ -1,0 +1,77 @@
+---
+- hosts: all
+  tasks:
+  - name: Copy MQ into /tmp as root
+    ansible.builtin.copy:
+      src: /Users/avinash/Downloads/mqadv_dev921_linux_x86-64.tar
+      dest: /tmp/mqadv_dev921_linux_x86-64.tar
+      owner: root
+      group: root
+      mode: '0777'
+  - name: Install compression utilities
+    yum:
+      name:
+        - tar
+        - unzip
+        - zip
+        - gzip
+      state: present
+  - name: Extract MQ into /tmp
+    ansible.builtin.unarchive:
+      src: /tmp/mqadv_dev921_linux_x86-64.tar
+      dest: /tmp/
+      remote_src: yes
+  - name: Install the IBM MQ Series 9.2.1 RPMs from a remote FS
+    yum:
+      name:
+        - /tmp/MQServer/MQSeriesRuntime-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesJRE-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesJava-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesServer-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesWeb-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesFTBase-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesFTAgent-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesFTService-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesFTLogger-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesFTTools-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesAMQP-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesAMS-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesXRService-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesExplorer-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesGSKit-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesClient-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesMan-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesMsg_cs-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesMsg_de-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesMsg_es-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesMsg_fr-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesMsg_hu-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesMsg_it-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesMsg_ja-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesMsg_ko-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesMsg_pl-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesMsg_pt-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesMsg_ru-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesMsg_Zh_CN-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesMsg_Zh_TW-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesSamples-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesSDK-9.2.1-0.x86_64.rpm
+        - /tmp/MQServer/MQSeriesBCBridge-9.2.1-0.x86_64.rpm
+      state: present
+      disable_gpg_check: True
+  - name: Run a script with arguments (using 'cmd' parameter)
+    command: /opt/mqm/bin/mqlicense -accept -text_only
+  - name: Run a script with arguments (using 'cmd' parameter)
+    become: true
+    become_user: 'mqm'
+    become_method: su
+    args:
+      executable: /bin/bash
+    shell: |
+      whoami
+      cd /opt/mqm/bin/
+      pwd
+      source setmqenv -s
+      strmqweb
+    register: sysout
+  - debug: var=sysout.stdout_lines
