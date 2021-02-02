@@ -61,6 +61,13 @@
       disable_gpg_check: True
   - name: Run a script with arguments (using 'cmd' parameter)
     command: /opt/mqm/bin/mqlicense -accept -text_only
+  - name: Copy MQ Web Admin Configuration
+    copy:
+      src: /Users/avinash/suitcase/Code/Repositories/personal/ansible_playbooks/ibm-mq/mqwebuser.xml
+      dest: /var/mqm/web/installations/Installation1/servers/mqweb/mqwebuser.xml
+      owner: mqm
+      group: mqm
+      mode: '0777'
   - name: Run a script with arguments (using 'cmd' parameter)
     become: true
     become_user: 'mqm'
